@@ -1,70 +1,6 @@
-# Lecture 1: Introduction to Terraform and Infrastructure as Code
-
-This guide provides the technical steps required to complete the practical portion of the introduction to Terraform. Follow these steps to deploy a complete AWS infrastructure environment.
-
----
-
-## Lab: Enhanced Infrastructure – EC2 with VPC and S3
-
-### Objective
-Build a complete infrastructure environment that includes networking (VPC), storage (S3), IAM configuration, and an EC2 instance with proper security controls.
-
-### Resources Created
-- 1 VPC (10.0.0.0/16)
-- 1 Internet Gateway
-- 1 Subnet (10.0.1.0/24)
-- 1 Route Table + Association
-- 1 Security Group (SSH allowed)
-- 1 S3 Bucket (unique name)
-- 1 IAM Role + Policy + Instance Profile
-- 1 EC2 Instance (t3.micro)
-
----
-
-### Step 1: Install Terraform
-
-1. Download Terraform from the official distribution for your OS (Windows, macOS, or Linux).
-2. Extract the executable and add it to your system PATH.
-
-**For macOS/Linux:**
-```bash
-mv terraform /usr/local/bin/
-```
-
-**Verify installation:**
-```bash
-terraform --version
-```
-
----
-
-### Step 2: Configure AWS Credentials
-
-Set your AWS access keys as environment variables:
-```bash
-export AWS_ACCESS_KEY_ID="your_access_key"
-export AWS_SECRET_ACCESS_KEY="your_secret_key"
-```
-
----
-
-### Step 3: Create the Project Directory
-
-```bash
-mkdir lab-enhanced-infrastructure
-cd lab-enhanced-infrastructure
-```
-
----
-
-### Step 4: Write the Infrastructure Code
-
-Create `main.tf` with the following configuration:
-
-```hcl
 # Provider Configuration
 provider "aws" {
-  region = "us-east-1"
+  region = "us-east-1"  # Change to your preferred region
 }
 
 # VPC - Your Private Network
@@ -129,13 +65,15 @@ resource "aws_security_group" "lab_sg" {
   description = "Security group for Terraform lab EC2"
   vpc_id      = aws_vpc.lab_vpc.id
 
+  # Allow SSH access
   ingress {
     from_port   = 22
     to_port     = 22
     protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
+    cidr_blocks = ["0.0.0.0/0"]  # Warning: Open to all IPs - restrict in production
   }
 
+  # Allow all outbound traffic
   egress {
     from_port   = 0
     to_port     = 0
@@ -149,11 +87,6 @@ resource "aws_security_group" "lab_sg" {
   }
 }
 
-# Random ID for unique bucket name
-resource "random_id" "bucket_suffix" {
-  byte_length = 4
-}
-
 # S3 Bucket - Your cloud storage
 resource "aws_s3_bucket" "lab_bucket" {
   bucket = "terraform-lab-bucket-${random_id.bucket_suffix.hex}"
@@ -162,6 +95,11 @@ resource "aws_s3_bucket" "lab_bucket" {
     Name      = "Terraform-Lab-Bucket"
     CreatedBy = "Terraform"
   }
+}
+
+# Random ID for unique bucket name
+resource "random_id" "bucket_suffix" {
+  byte_length = 4
 }
 
 # IAM Role for EC2 to access S3
@@ -219,7 +157,7 @@ resource "aws_iam_instance_profile" "ec2_profile" {
 
 # EC2 Instance - Your server in the VPC with S3 access
 resource "aws_instance" "my_first_server" {
-  ami                    = "ami-0c101f26f147fa7fd"
+  ami                    = "ami-0c101f26f147fa7fd"  # Amazon Linux 2023
   instance_type          = "t3.micro"
   subnet_id              = aws_subnet.lab_subnet.id
   vpc_security_group_ids = [aws_security_group.lab_sg.id]
@@ -246,60 +184,3 @@ output "s3_bucket_name" {
   description = "Name of S3 bucket"
   value       = aws_s3_bucket.lab_bucket.id
 }
-```
-
----
-
-### Step 5: Deploy the Infrastructure
-
-#### Initialize Terraform
-```bash
-terraform init
-```
-
-#### Review the Plan
-```bash
-terraform plan
-```
-
-#### Apply the Configuration
-```bash
-terraform apply
-```
-
----
-
-### Step 6: Test S3 Access from EC2
-
-SSH into the instance and verify S3 access:
-```bash
-ssh -i your-key.pem ec2-user@<instance_public_ip>
-aws s3 ls s3://<your-bucket-name>
-echo "Hello from EC2" > test.txt
-aws s3 cp test.txt s3://<your-bucket-name>/
-```
-
----
-
-### Step 7: Modification Exercise
-
-Change instance type from `t3.micro` to `t3.small` in `main.tf`:
-```hcl
-instance_type = "t3.small"
-```
-
-Then run:
-```bash
-terraform plan   # See the ~ symbol for update
-terraform apply  # Apply the change
-```
-
----
-
-### Step 8: Cleanup
-
-```bash
-terraform destroy
-```
-
-> ⚠️ **Security Note:** The security group allows SSH from any IP (`0.0.0.0/0`). Restrict this in production environments.
