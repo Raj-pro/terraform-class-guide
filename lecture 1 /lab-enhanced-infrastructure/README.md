@@ -1,14 +1,9 @@
-# Lab 4 – Enhanced Infrastructure: EC2 with VPC and S3
+# Lab 4 – Enhanced Infrastructure: EC2 with S3
 
 ## Overview
-Building on the "Evolution of a Machine" concept, this lab expands infrastructure to include networking (VPC) and storage (S3).
+This lab demonstrates how to create an EC2 instance with IAM permissions to access an S3 bucket using Terraform.
 
 ## Resources Created
-- 1 VPC (10.0.0.0/16)
-- 1 Internet Gateway
-- 1 Subnet (10.0.1.0/24)
-- 1 Route Table + Association
-- 1 Security Group (SSH allowed)
 - 1 S3 Bucket (unique name)
 - 1 IAM Role + Policy + Instance Profile
 - 1 EC2 Instance (t3.micro)
@@ -55,6 +50,3 @@ terraform apply  # Apply the change
 ```bash
 terraform destroy
 ```
-
-## Security Note
-⚠️ The security group allows SSH from any IP (`0.0.0.0/0`). Restrict this in production.

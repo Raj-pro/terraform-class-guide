@@ -1,20 +1,15 @@
 # Lecture 1: Introduction to Terraform and Infrastructure as Code
 
-This guide provides the technical steps required to complete the practical portion of the introduction to Terraform. Follow these steps to deploy a complete AWS infrastructure environment.
+This guide provides the technical steps required to complete the practical portion of the introduction to Terraform. Follow these steps to deploy an EC2 instance with S3 access.
 
 ---
 
-## Lab: Enhanced Infrastructure – EC2 with VPC and S3
+## Lab: EC2 with S3 Access
 
 ### Objective
-Build a complete infrastructure environment that includes networking (VPC), storage (S3), IAM configuration, and an EC2 instance with proper security controls.
+Create an EC2 instance with IAM permissions to access an S3 bucket using Terraform.
 
 ### Resources Created
-- 1 VPC (10.0.0.0/16)
-- 1 Internet Gateway
-- 1 Subnet (10.0.1.0/24)
-- 1 Route Table + Association
-- 1 Security Group (SSH allowed)
 - 1 S3 Bucket (unique name)
 - 1 IAM Role + Policy + Instance Profile
 - 1 EC2 Instance (t3.micro)
@@ -65,88 +60,6 @@ Create `main.tf` with the following configuration:
 # Provider Configuration
 provider "aws" {
   region = "us-east-1"
-}
-
-# VPC - Your Private Network
-resource "aws_vpc" "lab_vpc" {
-  cidr_block           = "10.0.0.0/16"
-  enable_dns_hostnames = true
-  enable_dns_support   = true
-
-  tags = {
-    Name      = "Terraform-Lab-VPC"
-    CreatedBy = "Terraform"
-  }
-}
-
-# Internet Gateway - Connects VPC to Internet
-resource "aws_internet_gateway" "lab_igw" {
-  vpc_id = aws_vpc.lab_vpc.id
-
-  tags = {
-    Name      = "Terraform-Lab-IGW"
-    CreatedBy = "Terraform"
-  }
-}
-
-# Subnet - A segment within your VPC
-resource "aws_subnet" "lab_subnet" {
-  vpc_id                  = aws_vpc.lab_vpc.id
-  cidr_block              = "10.0.1.0/24"
-  availability_zone       = "us-east-1a"
-  map_public_ip_on_launch = true
-
-  tags = {
-    Name      = "Terraform-Lab-Subnet"
-    CreatedBy = "Terraform"
-  }
-}
-
-# Route Table - Defines network traffic rules
-resource "aws_route_table" "lab_rt" {
-  vpc_id = aws_vpc.lab_vpc.id
-
-  route {
-    cidr_block = "0.0.0.0/0"
-    gateway_id = aws_internet_gateway.lab_igw.id
-  }
-
-  tags = {
-    Name      = "Terraform-Lab-RouteTable"
-    CreatedBy = "Terraform"
-  }
-}
-
-# Route Table Association - Links subnet to route table
-resource "aws_route_table_association" "lab_rta" {
-  subnet_id      = aws_subnet.lab_subnet.id
-  route_table_id = aws_route_table.lab_rt.id
-}
-
-# Security Group - Firewall rules for EC2
-resource "aws_security_group" "lab_sg" {
-  name        = "terraform-lab-sg"
-  description = "Security group for Terraform lab EC2"
-  vpc_id      = aws_vpc.lab_vpc.id
-
-  ingress {
-    from_port   = 22
-    to_port     = 22
-    protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-
-  egress {
-    from_port   = 0
-    to_port     = 0
-    protocol    = "-1"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-
-  tags = {
-    Name      = "Terraform-Lab-SG"
-    CreatedBy = "Terraform"
-  }
 }
 
 # Random ID for unique bucket name
@@ -217,12 +130,10 @@ resource "aws_iam_instance_profile" "ec2_profile" {
   role = aws_iam_role.ec2_s3_role.name
 }
 
-# EC2 Instance - Your server in the VPC with S3 access
+# EC2 Instance - Your server with S3 access
 resource "aws_instance" "my_first_server" {
   ami                    = "ami-0c101f26f147fa7fd"
   instance_type          = "t3.micro"
-  subnet_id              = aws_subnet.lab_subnet.id
-  vpc_security_group_ids = [aws_security_group.lab_sg.id]
   iam_instance_profile   = aws_iam_instance_profile.ec2_profile.name
 
   tags = {
@@ -232,14 +143,14 @@ resource "aws_instance" "my_first_server" {
 }
 
 # Outputs - Display important information
+output "instance_id" {
+  description = "EC2 instance ID"
+  value       = aws_instance.my_first_server.id
+}
+
 output "instance_public_ip" {
   description = "Public IP of EC2 instance"
   value       = aws_instance.my_first_server.public_ip
-}
-
-output "vpc_id" {
-  description = "VPC ID"
-  value       = aws_vpc.lab_vpc.id
 }
 
 output "s3_bucket_name" {
@@ -301,5 +212,3 @@ terraform apply  # Apply the change
 ```bash
 terraform destroy
 ```
-
-> ⚠️ **Security Note:** The security group allows SSH from any IP (`0.0.0.0/0`). Restrict this in production environments.
