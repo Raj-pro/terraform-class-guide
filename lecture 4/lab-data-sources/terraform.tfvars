@@ -1,0 +1,10 @@
+# Default values for development
+aws_region           = "us-east-1"
+environment          = "dev"
+project_name         = "datasource-demo"
+vpc_cidr             = "10.0.0.0/16"
+public_subnet_count  = 2
+private_subnet_count = 2
+instance_type        = "t3.micro"
+instance_count       = 2
+enable_nat_gateway   = true
