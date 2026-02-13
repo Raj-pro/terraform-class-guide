@@ -28,7 +28,7 @@ locals {
       enable_monitoring = true
     }
   }
-  
+
   # Get config for current workspace
   config = local.workspace_config[terraform.workspace]
 }
