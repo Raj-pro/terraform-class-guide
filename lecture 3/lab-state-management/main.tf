@@ -48,6 +48,25 @@ resource "aws_internet_gateway" "main" {
   }
 }
 
+# Public route table for internet access
+resource "aws_route_table" "public" {
+  vpc_id = aws_vpc.main.id
+
+  route {
+    cidr_block = "0.0.0.0/0"
+    gateway_id = aws_internet_gateway.main.id
+  }
+
+  tags = {
+    Name = "${var.environment}-public-rt"
+  }
+}
+
+resource "aws_route_table_association" "public" {
+  subnet_id      = aws_subnet.public.id
+  route_table_id = aws_route_table.public.id
+}
+
 # Security Group
 resource "aws_security_group" "web" {
   name        = "${var.environment}-web-sg"
@@ -103,9 +122,8 @@ resource "aws_instance" "web" {
 resource "aws_s3_bucket" "terraform_state" {
   bucket = "${var.project_name}-tfstate-${data.aws_caller_identity.current.account_id}"
 
-  lifecycle {
-    prevent_destroy = true
-  }
+  # NOTE: In real production backends you may want lifecycle.prevent_destroy = true.
+  # This lab keeps cleanup easy, so we allow destroy.
 
   tags = {
     Name        = "Terraform State Bucket"

@@ -13,6 +13,18 @@ data "aws_ami" "amazon_linux" {
   }
 }
 
+data "aws_availability_zones" "available" {
+  state = "available"
+}
+
+locals {
+  # us-east-1e does not support some instance families in some accounts.
+  # Filter it out by default for this lab to keep applies reliable.
+  az_names = var.aws_region == "us-east-1" ? [
+    for az in data.aws_availability_zones.available.names : az if az != "us-east-1e"
+  ] : data.aws_availability_zones.available.names
+}
+
 # =============================================================================
 # SHARED VPC AND NETWORKING
 # =============================================================================
@@ -34,11 +46,25 @@ resource "aws_internet_gateway" "shared" {
   }
 }
 
+resource "aws_route_table" "public" {
+  vpc_id = aws_vpc.shared.id
+
+  route {
+    cidr_block = "0.0.0.0/0"
+    gateway_id = aws_internet_gateway.shared.id
+  }
+
+  tags = {
+    Name = "shared-public-rt"
+  }
+}
+
 # Dev subnet
 resource "aws_subnet" "dev" {
   vpc_id                  = aws_vpc.shared.id
   cidr_block              = "10.0.1.0/24"
   map_public_ip_on_launch = true
+  availability_zone       = local.az_names[0]
 
   tags = {
     Name        = "dev-subnet"
@@ -46,16 +72,27 @@ resource "aws_subnet" "dev" {
   }
 }
 
+resource "aws_route_table_association" "dev" {
+  subnet_id      = aws_subnet.dev.id
+  route_table_id = aws_route_table.public.id
+}
+
 # Prod subnet
 resource "aws_subnet" "prod" {
   vpc_id                  = aws_vpc.shared.id
   cidr_block              = "10.0.2.0/24"
   map_public_ip_on_launch = true
+  availability_zone       = local.az_names[1]
 
   tags = {
     Name        = "prod-subnet"
     Environment = "prod"
   }
+}
+
+resource "aws_route_table_association" "prod" {
+  subnet_id      = aws_subnet.prod.id
+  route_table_id = aws_route_table.public.id
 }
 
 # Dev security group

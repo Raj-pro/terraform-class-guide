@@ -12,6 +12,7 @@
 
 # Terraform variables (keep examples, ignore real local config)
 **/terraform.tfvars
+**/*.tfvars
 **/*.auto.tfvars
 
 # Terraform plans / graphs / logs

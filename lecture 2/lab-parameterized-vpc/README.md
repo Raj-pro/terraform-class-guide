@@ -32,8 +32,8 @@ Build a complete VPC with subnets and EC2 instances using parameterized configur
 | locals.tf | Computed values and common tags |
 | main.tf | VPC, subnets, EC2, and all resources |
 | outputs.tf | Output values |
-| terraform.tfvars | Default variable values |
-| prod.tfvars | Production overrides |
+| terraform.tfvars.example | Default variable values (template) |
+| prod.tfvars.example | Production overrides (template) |
 
 ---
 
@@ -66,11 +66,11 @@ terraform plan
 # Shows: environment = "staging"
 
 # 3. Override with -var-file
-terraform plan -var-file="prod.tfvars"
+terraform plan -var-file="prod.tfvars.example"
 # Shows: environment = "prod", instance_count = 3
 
 # 4. Override with -var (highest priority)
-terraform plan -var-file="prod.tfvars" -var="instance_count=1"
+terraform plan -var-file="prod.tfvars.example" -var="instance_count=1"
 # Shows: environment = "prod", instance_count = 1
 
 # Clean up environment variable
@@ -152,7 +152,7 @@ terraform apply -var="enable_nat_gateway=true"
 
 ```bash
 terraform destroy
-terraform apply -var-file="prod.tfvars"
+terraform apply -var-file="prod.tfvars.example"
 ```
 
 ---

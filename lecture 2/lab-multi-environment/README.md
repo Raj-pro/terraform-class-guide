@@ -19,9 +19,9 @@ Build infrastructure that adapts to different environments using variables, loca
 | locals.tf | Computed environment-specific values |
 | main.tf | VPC, subnets, EC2, conditional resources |
 | outputs.tf | Configuration summary and cost estimate |
-| dev.tfvars | Development configuration |
-| staging.tfvars | Staging configuration |
-| prod.tfvars | Production configuration |
+| dev.tfvars.example | Development configuration (template) |
+| staging.tfvars.example | Staging configuration (template) |
+| prod.tfvars.example | Production configuration (template) |
 
 ## Environment Differences
 
@@ -37,6 +37,8 @@ Build infrastructure that adapts to different environments using variables, loca
 
 ## Steps to Execute
 
+Note: This public repo keeps environment var-files as templates. You can either use the `*.tfvars.example` files directly, or copy them to `*.tfvars` locally.
+
 ### Step 1: Initialize Terraform
 
 ```bash
@@ -46,8 +48,8 @@ terraform init
 ### Step 2: Deploy Development Environment
 
 ```bash
-terraform plan -var-file="dev.tfvars"
-terraform apply -var-file="dev.tfvars"
+terraform plan -var-file="dev.tfvars.example"
+terraform apply -var-file="dev.tfvars.example"
 ```
 
 ### Step 3: View Configuration
@@ -60,27 +62,27 @@ terraform output cost_estimate
 ### Step 4: Destroy Development
 
 ```bash
-terraform destroy -var-file="dev.tfvars"
+terraform destroy -var-file="dev.tfvars.example"
 ```
 
 ### Step 5: Deploy Staging Environment
 
 ```bash
-terraform plan -var-file="staging.tfvars"
-terraform apply -var-file="staging.tfvars"
+terraform plan -var-file="staging.tfvars.example"
+terraform apply -var-file="staging.tfvars.example"
 ```
 
 ### Step 6: Destroy Staging
 
 ```bash
-terraform destroy -var-file="staging.tfvars"
+terraform destroy -var-file="staging.tfvars.example"
 ```
 
 ### Step 7: Deploy Production Environment
 
 ```bash
-terraform plan -var-file="prod.tfvars"
-terraform apply -var-file="prod.tfvars"
+terraform plan -var-file="prod.tfvars.example"
+terraform apply -var-file="prod.tfvars.example"
 ```
 
 ### Step 8: Verify Production Features
@@ -139,9 +141,9 @@ output "instance_public_ips" {
 Run terraform plan with different var-files to see the differences:
 
 ```bash
-terraform plan -var-file="dev.tfvars"
-terraform plan -var-file="staging.tfvars"
-terraform plan -var-file="prod.tfvars"
+terraform plan -var-file="dev.tfvars.example"
+terraform plan -var-file="staging.tfvars.example"
+terraform plan -var-file="prod.tfvars.example"
 ```
 
 ### Exercise 2: Add a New Environment
@@ -155,5 +157,5 @@ Add cost center tags that differ by environment.
 ## Cleanup
 
 ```bash
-terraform destroy -var-file="prod.tfvars"
+terraform destroy -var-file="prod.tfvars.example"
 ```
