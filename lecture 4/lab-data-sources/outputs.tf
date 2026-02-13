@@ -110,12 +110,12 @@ output "instance_private_ips" {
 output "infrastructure_summary" {
   description = "Summary of created infrastructure"
   value = {
-    account     = data.aws_caller_identity.current.account_id
-    region      = data.aws_region.current.name
-    vpc_id      = aws_vpc.main.id
+    account         = data.aws_caller_identity.current.account_id
+    region          = data.aws_region.current.name
+    vpc_id          = aws_vpc.main.id
     public_subnets  = length(aws_subnet.public)
     private_subnets = length(aws_subnet.private)
-    instances   = length(aws_instance.web)
-    nat_enabled = var.enable_nat_gateway
+    instances       = length(aws_instance.web)
+    nat_enabled     = var.enable_nat_gateway
   }
 }

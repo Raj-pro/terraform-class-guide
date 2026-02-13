@@ -15,7 +15,10 @@ sudo yum install -y httpd
 
 # Install additional tools
 echo "Installing utilities..."
-sudo yum install -y curl wget vim
+if ! command -v curl >/dev/null 2>&1; then
+	sudo yum install -y curl-minimal
+fi
+sudo yum install -y wget vim
 
 # Enable and start Apache
 echo "Starting Apache..."

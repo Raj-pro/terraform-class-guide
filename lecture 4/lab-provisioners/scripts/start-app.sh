@@ -54,4 +54,20 @@ EOF
 sudo systemctl restart httpd
 
 echo "=== Application Deployed ==="
-echo "Access URL: http://$(curl -s http://169.254.169.254/latest/meta-data/public-ipv4)"
+
+PUBLIC_IP=""
+if command -v curl >/dev/null 2>&1; then
+    TOKEN=$(curl -sS -X PUT "http://169.254.169.254/latest/api/token" \
+        -H "X-aws-ec2-metadata-token-ttl-seconds: 60" || true)
+
+    if [ -n "$TOKEN" ]; then
+        PUBLIC_IP=$(curl -sS -H "X-aws-ec2-metadata-token: $TOKEN" \
+            "http://169.254.169.254/latest/meta-data/public-ipv4" || true)
+    else
+        PUBLIC_IP=$(curl -sS "http://169.254.169.254/latest/meta-data/public-ipv4" || true)
+    fi
+fi
+
+if [ -n "$PUBLIC_IP" ]; then
+    echo "Access URL: http://$PUBLIC_IP"
+fi

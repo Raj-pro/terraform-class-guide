@@ -1,9 +1,0 @@
-aws_region           = "us-east-1"
-environment          = "dev"
-project_name         = "provisioner-demo"
-vpc_cidr             = "10.0.0.0/16"
-instance_type        = "t3.micro"
-ssh_public_key_path  = "~/.ssh/id_rsa.pub"
-ssh_private_key_path = "~/.ssh/id_rsa"
-app_port             = 80
-app_name             = "myapp"

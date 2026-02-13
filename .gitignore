@@ -1,0 +1,30 @@
+# OS / editor
+.DS_Store
+.vscode/
+*.code-workspace
+
+# Terraform local state
+**/.terraform/
+**/*.tfstate
+**/*.tfstate.*
+**/terraform.tfstate
+**/terraform.tfstate.*
+
+# Terraform variables (keep examples, ignore real local config)
+**/terraform.tfvars
+**/*.auto.tfvars
+
+# Terraform plans / graphs / logs
+**/tfplan
+**/tfplan*
+**/graph.dot
+**/*.log
+**/crash.log
+
+# SSH keys / certs
+**/.keys/
+**/*.pem
+**/*.key
+
+# Misc
+*.bak
